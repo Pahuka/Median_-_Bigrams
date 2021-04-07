@@ -14,7 +14,19 @@ namespace linq_slideviews
         /// <exception cref="InvalidOperationException">Если последовательность не содержит элементов</exception>
         public static double Median(this IEnumerable<double> items)
         {
-            throw new NotImplementedException();
+            var medianList = items.ToList();
+            int index = medianList.Capacity;
+            if (index == 0) throw new InvalidOperationException();
+            if (index % 2 == 0) return medianList
+                          .OrderBy(x => x)
+                          .Skip((index / 2) - 1)
+                          .Take(2)
+                          .Sum()/2;
+
+            return medianList
+                        .OrderBy(x => x)
+                        .Skip(index/2)
+                        .First();
         }
 
         /// <returns>
@@ -24,24 +36,38 @@ namespace linq_slideviews
         public static IEnumerable<Tuple<T, T>> Bigrams<T>(this IEnumerable<T> items)
         {
             List<Tuple<T, T>> result = new List<Tuple<T, T>>();
-
-            if (items.Count() < 2) return Enumerable.Empty<Tuple<T, T>>();
+            var values = items.GetEnumerator();
+            if (!values.MoveNext()) yield break;
             else
             {
-                int index = 0;
-                for (int i = 0; i < items.Count(); i++)
+                T tempValue = values.Current;
+                int index = 1;
+                while (values.MoveNext())
                 {
                     index++;
                     if (index == 2)
                     {
-                        index = 0;
-                        result.Add(Tuple.Create(items.ElementAt(i - 1), items.ElementAt(i)));
-                        i--;
+                        yield return Tuple.Create(tempValue, values.Current);
+                        index = 1;
+                        tempValue = values.Current;
                     }
+                    tempValue = values.Current;
                 }
+
+                //int index = 0;
+                //for (int i = 0; i < items.Count(); i++)
+                //{
+                //    index++;
+                //    if (index == 2)
+                //    {
+                //        index = 0;
+                //        result.Add(Tuple.Create(items.ElementAt(i - 1), items.ElementAt(i)));
+                //        i--;
+                //    }
+                //}
             }
 
-            return result;
+            //return result;
         }
     }
 }
