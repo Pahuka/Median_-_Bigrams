@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace linq_slideviews
 {
@@ -17,7 +19,8 @@ namespace linq_slideviews
                     return lines
                         .Skip(1)
                         .Select(x => x.Split(';'))
-                        .ToDictionary(x => int.Parse(x[0]), x => new SlideRecord(int.Parse(x[0]), (SlideType)FindSlideType(x[1]), x[2]));
+                        .ToDictionary(x => int.Parse(x[0]),
+                                      x => new SlideRecord(int.Parse(x[0]), (SlideType)FindSlideType(x[1]), x[2]));
                 }
                 catch
                 {
@@ -40,7 +43,24 @@ namespace linq_slideviews
         public static IEnumerable<VisitRecord> ParseVisitRecords(
             IEnumerable<string> lines, IDictionary<int, SlideRecord> slides)
         {
-            throw new NotImplementedException();
+            foreach (var item in lines.Skip(1))
+            {
+                if (Regex.IsMatch(item, @"(.*?);(.*?);(.*?);(.*?)"))
+                {
+                    var time = item.Split(';');
+                    if (DateTime.TryParseExact((time[2] + " " + time[3]), "yyyy-MM-dd HH:mm:ss", new CultureInfo("en-US"), DateTimeStyles.None, out DateTime timeFormat))
+                    {
+                        return lines
+                        .Skip(1)
+                        .Select(x => x.Split(';'))
+                        .Select(x => new VisitRecord(int.Parse(x[0]), int.Parse(x[1]), DateTime.Parse(x[2] + " " + x[3]),
+                            slides[int.Parse(x[1])].SlideType));
+                    }
+                    else throw new FormatException($"Wrong line [{item}]");
+                }
+                else throw new FormatException($"Wrong line [{item}]");
+            }
+            return new List<VisitRecord>();
         }
     }
 }
