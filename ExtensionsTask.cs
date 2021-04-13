@@ -15,7 +15,7 @@ namespace linq_slideviews
         public static double Median(this IEnumerable<double> items)
         {
             var medianList = items.ToList();
-            int index = medianList.Capacity;
+            int index = medianList.Count;
             if (index == 0) throw new InvalidOperationException();
             if (index % 2 == 0) return medianList
                           .OrderBy(x => x)
