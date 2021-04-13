@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -26,20 +25,6 @@ namespace linq_slideviews
                             (SlideType)FindSlideType(itemSplit[1]), itemSplit[2]));
                     }
                 }
-
-            //if (lines.Count() > 1)
-            //    try
-            //    {
-            //        return lines
-            //            .Skip(1)
-            //            .Select(x => x.Split(';'))
-            //            .ToDictionary(x => int.Parse(x[0]),
-            //                          x => new SlideRecord(int.Parse(x[0]), (SlideType)FindSlideType(x[1]), x[2]));
-            //    }
-            //    catch
-            //    {
-            //        return new Dictionary<int, SlideRecord>();
-            //    }
             return result;
         }
 
@@ -61,37 +46,20 @@ namespace linq_slideviews
 
             foreach (var item in lines.Skip(1))
             {
-                var itemSplit = item.Split(';');
-                if (Regex.IsMatch(item, @"(^\d+);(\d+);(.*?);(.+)") || slides.ContainsKey(int.Parse(itemSplit[1])))
+                if (Regex.IsMatch(item, @"(^\d+);(\d+);(.*?);(.+)"))
                 {
-                    if (DateTime.TryParseExact((itemSplit[2] + " " + itemSplit[3]), "yyyy-MM-dd HH:mm:ss",
-                        new CultureInfo("en-US"), DateTimeStyles.None, out DateTime timeFormat))
+                    var itemSplit = item.Split(';');
+                    if (DateTime.TryParse((itemSplit[2] + " " + itemSplit[3]), out DateTime timeFormat)
+                       & slides.ContainsKey(int.Parse(itemSplit[1])))
                     {
                         result.Add(new VisitRecord(int.Parse(itemSplit[0]), int.Parse(itemSplit[1]),
-                            DateTime.Parse(itemSplit[2] + " " + itemSplit[3]), slides[int.Parse(itemSplit[1])].SlideType));
+                            DateTime.Parse(itemSplit[2] + " " + itemSplit[3]),
+                            slides[int.Parse(itemSplit[1])].SlideType));
                     }
                     else throw new FormatException($"Wrong line [{item}]");
                 }
                 else throw new FormatException($"Wrong line [{item}]");
             }
-
-            //foreach (var item in lines.Skip(1))
-            //{
-            //    if (Regex.IsMatch(item, @"(^\d+);(\d+);(.*?);(.+)"))
-            //    {
-            //        var time = item.Split(';');
-            //        if (DateTime.TryParseExact((time[2] + " " + time[3]), "yyyy-MM-dd HH:mm:ss", new CultureInfo("en-US"), DateTimeStyles.None, out DateTime timeFormat))
-            //        {
-            //            return lines
-            //            .Skip(1)
-            //            .Select(x => x.Split(';'))
-            //            .Select(x => new VisitRecord(int.Parse(x[0]), int.Parse(x[1]), DateTime.Parse(x[2] + " " + x[3]),
-            //                slides[int.Parse(x[1])].SlideType));
-            //        }
-            //        else throw new FormatException($"Wrong line [{item}]");
-            //    }
-            //    else throw new FormatException($"Wrong line [{item}]");
-            //}
             return result;
         }
     }
