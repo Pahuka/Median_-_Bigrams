@@ -75,7 +75,7 @@ namespace linq_slideviews
 		}
 
         [Test]
-        public void TestOnRealFiles()
+        public void TestOnRealFiles_Exercise()
         {
             var separators = new char[] { '\r', '\n' };
             var visits = File.ReadAllText(@"C:\Temp\STUDY\Median_&_Bigrams\visits.txt").Split(separators, StringSplitOptions.RemoveEmptyEntries);
@@ -84,6 +84,18 @@ namespace linq_slideviews
             var parsedVisits = ParsingTask.ParseVisitRecords(visits, parsedSlides);
             var median = StatisticsTask.GetMedianTimePerSlide(parsedVisits.ToList(), SlideType.Exercise);
             Assert.AreEqual(8.3333333333333339d, median, 1e-5);
+        }
+
+        [Test]
+        public void TestOnRealFiles_Quiz()
+        {
+            var separators = new char[] { '\r', '\n' };
+            var visits = File.ReadAllText(@"C:\Temp\STUDY\Median_&_Bigrams\visits.txt").Split(separators, StringSplitOptions.RemoveEmptyEntries);
+            var slides = File.ReadAllText(@"C:\Temp\STUDY\Median_&_Bigrams\slides.txt").Split(separators, StringSplitOptions.RemoveEmptyEntries);
+            var parsedSlides = ParsingTask.ParseSlideRecords(slides);
+            var parsedVisits = ParsingTask.ParseVisitRecords(visits, parsedSlides);
+            var median = StatisticsTask.GetMedianTimePerSlide(parsedVisits.ToList(), SlideType.Quiz);
+            Assert.AreEqual(3.9916666666666658d, median, 1e-5);
         }
     }
 }

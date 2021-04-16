@@ -11,18 +11,22 @@ namespace linq_slideviews
             var result = new List<double>();
             var tempValue = visits
                 .GroupBy(userId => userId.UserId)
+                .Select(x => x.OrderBy(t => t.DateTime))
                 .Select(x => x.Bigrams())
-                .SelectMany(x => x.Where(y => y.Item1.SlideType == slideType && y.Item2.SlideType == slideType));
+                .SelectMany(x => x);
 
             if (tempValue.Count() != 0)
             {
                 foreach (var item in tempValue)
                 {
-                    var minutes = item.Item2.DateTime - item.Item1.DateTime;
-                    if ((minutes.TotalMinutes > 1.0) && (minutes.TotalMinutes < 120.0)) result.Add(minutes.TotalMinutes);
+                    if (item.Item1.SlideType == slideType)
+                    {
+                        var minutes = item.Item2.DateTime - item.Item1.DateTime;
+                        if ((minutes.TotalMinutes >= 1) && (minutes.TotalHours <= 2)) result.Add(minutes.TotalMinutes);
+                    }
                 }
 
-                return result.Median();
+                if (result.Count != 0) return result.Median();
             }
 
             return 0;
